@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GTA San Andreas Inventory</title>
+    <!-- GTA-style font -->
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --color-bg-dark: #181818;
+            --color-bg-light: #f4f4f4;
+            --color-header-dark: #222c1e;
+            --color-header-light: #fffbe6;
+            --color-primary-dark: #ffa500;
+            --color-primary-light: #32cd32;
+            --color-text-dark: #fff;
+            --color-text-light: #1a1a1a;
+            --color-card-dark: #232323;
+            --color-card-light: #fff;
+            --color-border-dark: #ffa500;
+            --color-border-light: #32cd32;
+            --color-shadow-dark: rgba(255,165,0,0.3);
+            --color-shadow-light: rgba(50,205,50,0.2);
+        }
+        [data-theme="dark"] {
+            --bg: var(--color-bg-dark);
+            --header: var(--color-header-dark);
+            --primary: var(--color-primary-dark);
+            --text: var(--color-text-dark);
+            --card: var(--color-card-dark);
+            --border: var(--color-border-dark);
+            --shadow: var(--color-shadow-dark);
+        }
+        [data-theme="light"] {
+            --bg: var(--color-bg-light);
+            --header: var(--color-header-light);
+            --primary: var(--color-primary-light);
+            --text: var(--color-text-light);
+            --card: var(--color-card-light);
+            --border: var(--color-border-light);
+            --shadow: var(--color-shadow-light);
+        }
+        html, body {
+            min-height: 100vh;
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Orbitron', monospace;
+            transition: background 0.4s, color 0.4s;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 24px;
+        }
+        .header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--header) 100%);
+            border: 2px solid var(--border);
+            border-radius: 15px;
+            padding: 32px 24px 24px 24px;
+            margin-bottom: 30px;
+            box-shadow: 0 0 30px var(--shadow);
+            position: relative;
+            text-align: center;
+        }
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 900;
+            background: linear-gradient(45deg, var(--primary), var(--header), var(--primary));
+            background-size: 200% 200%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: textGlow 3s ease-in-out infinite;
+        }
+        @keyframes textGlow {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+        .header p {
+            color: var(--text);
+            font-weight: 700;
+            margin-top: 8px;
+        }
+        .theme-switch {
+            position: absolute;
+            top: 20px;
+            right: 32px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            z-index: 2;
+        }
+        .theme-switch label {
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+        }
+        .switch {
+            width: 60px;
+            height: 30px;
+            background: var(--card);
+            border-radius: 15px;
+            border: 2px solid var(--border);
+            position: relative;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .switch input {
+            display: none;
+        }
+        .slider {
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 24px;
+            height: 24px;
+            background: var(--primary);
+            border-radius: 50%;
+            transition: left 0.3s, background 0.3s;
+            box-shadow: 0 0 8px var(--primary);
+        }
+        .switch input:checked + .slider {
+            left: 33px;
+            background: var(--primary);
+            box-shadow: 0 0 12px var(--primary);
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .stat-card {
+            background: var(--card);
+            border: 2px solid var(--border);
+            border-radius: 15px;
+            padding: 24px;
+            text-align: center;
+            box-shadow: 0 10px 30px var(--shadow);
+            transition: box-shadow 0.3s;
+        }
+        .stat-number {
+            font-size: 2.2rem;
+            font-weight: 900;
+            color: var(--primary);
+        }
+        .stat-label {
+            color: var(--text);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 350px;
+            gap: 30px;
+        }
+        .inventory-section {
+            background: var(--card);
+            border: 2px solid var(--border);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 20px 40px var(--shadow);
+        }
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+        .section-header h2 {
+            font-size: 1.3rem;
+            color: var(--primary);
+            font-weight: 900;
+            text-transform: uppercase;
+        }
+        .add-btn {
+            background: linear-gradient(45deg, var(--primary), var(--header));
+            color: var(--text);
+            border: 2px solid var(--border);
+            padding: 10px 22px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 900;
+            font-family: 'Orbitron', monospace;
+            text-transform: uppercase;
+            transition: background 0.3s, color 0.3s;
+        }
+        .add-btn:hover {
+            background: linear-gradient(45deg, var(--header), var(--primary));
+            color: var(--header);
+        }
+        .search-bar {
+            width: 100%;
+            padding: 14px 20px;
+            border: 2px solid var(--border);
+            border-radius: 25px;
+            font-size: 16px;
+            font-family: 'Orbitron', monospace;
+            background: var(--bg);
+            color: var(--text);
+            margin-bottom: 20px;
+        }
+        .inventory-table {
+            width: 100%;
+            border-collapse: collapse;
+            border-radius: 15px;
+            background: var(--card);
+            box-shadow: 0 10px 30px var(--shadow);
+        }
+        .inventory-table th, .inventory-table td {
+            padding: 12px;
+            border-bottom: 1px solid var(--border);
+        }
+        .inventory-table th {
+            background: linear-gradient(45deg, var(--primary), var(--header));
+            color: var(--header);
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .inventory-table tr:hover td {
+            background: linear-gradient(90deg, var(--primary) 10%, var(--header) 100%);
+            color: var(--text);
+        }
+        .status-badge {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border: 1px solid;
+            display: inline-block;
+            transition: background 0.3s, box-shadow 0.3s;
+        }
+        .status-low {
+            background: linear-gradient(45deg, #ff4444, #ff0000);
+            color: #fff;
+            border-color: #ff0000;
+            box-shadow: 0 0 10px #ff0000;
+            font-weight: 900;
+            text-shadow: 0 0 5px #ff4444, 0 0 10px #fff;
+            animation: glowLow 1.5s infinite alternate;
+        }
+        @keyframes glowLow {
+            from { box-shadow: 0 0 10px #ff0000, 0 0 2px #fff; }
+            to { box-shadow: 0 0 20px #ff2222, 0 0 8px #fff; }
+        }
+        .status-medium {
+            background: linear-gradient(45deg, #ffa500, #ffecb3);
+            color: #222;
+            border-color: #ffa500;
+            box-shadow: 0 0 6px #ffa500;
+        }
+        .status-high {
+            background: linear-gradient(45deg, #32cd32, #b2ffb2);
+            color: #222;
+            border-color: #32cd32;
+            box-shadow: 0 0 6px #32cd32;
+        }
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .widget {
+            background: var(--card);
+            border: 2px solid var(--border);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 10px 30px var(--shadow);
+        }
+        .widget h3 {
+            margin-bottom: 10px;
+            color: var(--primary);
+            font-size: 1.1rem;
+            font-weight: 900;
+            text-transform: uppercase;
+        }
+        .alert-item {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            background: #ff444422;
+            border-left: 4px solid #ff4444;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+        .alert-icon {
+            width: 20px;
+            height: 20px;
+            background: #ff4444;
+            border-radius: 50%;
+            margin-right: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 12px;
+            font-weight: 900;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.92);
+            z-index: 1000;
+        }
+        .modal-content {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            background: var(--card);
+            border: 2px solid var(--border);
+            padding: 40px;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 30px 60px var(--shadow);
+        }
+        .modal-content h2 {
+            color: var(--primary);
+            font-weight: 900;
+            text-transform: uppercase;
+            margin-bottom: 24px;
+            text-align: center;
+        }
+        .form-group { margin-bottom: 18px; }
+        .form-group label { display: block; margin-bottom: 8px; font-weight: 700; color: var(--primary);}
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 10px 14px;
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            font-size: 16px;
+            background: var(--bg);
+            color: var(--text);
+        }
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 20px;
+        }
+        .btn {
+            padding: 10px 22px;
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 900;
+            font-family: 'Orbitron', monospace;
+            text-transform: uppercase;
+        }
+        .btn-primary {
+            background: linear-gradient(45deg, var(--primary), var(--header));
+            color: var(--text);
+        }
+        .btn-secondary {
+            background: linear-gradient(45deg, #666, #333);
+            color: #fff;
+        }
+        .btn:hover { opacity: 0.85; }
+        @media (max-width: 900px) {
+            .main-content { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="theme-switch">
+                <label for="theme-toggle" title="Toggle Dark/Light Mode">🌙/☀️</label>
+                <div class="switch">
+                    <input type="checkbox" id="theme-toggle">
+                    <span class="slider"></span>
+                </div>
+            </div>
+            <h1>🏠 GROVE STREET INVENTORY 🏠</h1>
+            <p>🎮 San Andreas Business Management System - Respect +100 🎮</p>
+        </div>
+        <div class="stats-grid">
+            <div class="stat-card total-items">
+                <div class="stat-number" id="totalItems">0</div>
+                <div class="stat-label">🎯 Total Items</div>
+            </div>
+            <div class="stat-card low-stock">
+                <div class="stat-number" id="lowStock">0</div>
+                <div class="stat-label">⚠️ Low Stock Alerts</div>
+            </div>
+            <div class="stat-card value">
+                <div class="stat-number" id="totalValue">$0</div>
+                <div class="stat-label">💰 Total Value</div>
+            </div>
+            <div class="stat-card alerts">
+                <div class="stat-number" id="pendingOrders">0</div>
+                <div class="stat-label">📦 Pending Orders</div>
+            </div>
+        </div>
+        <div class="main-content">
+            <div class="inventory-section">
+                <div class="section-header">
+                    <h2>🏪 Business Inventory</h2>
+                    <button class="add-btn" onclick="openModal()">+ Add Product</button>
+                </div>
+                <input type="text" class="search-bar" placeholder="🔍 Search products in San Andreas..." onInput="searchProducts(this.value)">
+                <table class="inventory-table">
+                    <thead>
+                        <tr>
+                            <th>🎯 Product</th>
+                            <th>📂 Category</th>
+                            <th>📊 Stock</th>
+                            <th>🚦 Status</th>
+                            <th>💰 Value</th>
+                            <th>📅 Last Updated</th>
+                        </tr>
+                    </thead>
+                    <tbody id="inventoryBody">
+                        <!-- Dynamic content will be inserted here -->
+                    </tbody>
+                </table>
+            </div>
+            <div class="sidebar">
+                <div class="widget">
+                    <h3>🚨 Critical Alerts</h3>
+                    <div id="alertsList"></div>
+                </div>
+                <div class="widget">
+                    <h3>📊 Business Trends</h3>
+                    <div class="chart-container">
+                        📈 Analytics Dashboard<br>
+                        <small>Grove Street Business Intelligence</small>
+                    </div>
+                </div>
+                <div class="widget">
+                    <h3>⚡ Quick Actions</h3>
+                    <button class="add-btn" style="width: 100%; margin-bottom: 10px;" onclick="generateReport()">📋 Generate Report</button>
+                    <button class="add-btn" style="width: 100%; margin-bottom: 10px;" onclick="exportData()">💾 Export Data</button>
+                    <button class="add-btn" style="width: 100%;" onclick="autoReorder()">🔄 Auto Reorder</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Add Product Modal -->
+    <div id="productModal" class="modal">
+        <div class="modal-content">
+            <h2>🆕 Add New Product</h2>
+            <form id="productForm">
+                <div class="form-group">
+                    <label>🎯 Product Name</label>
+                    <input type="text" id="productName" required>
+                </div>
+                <div class="form-group">
+                    <label>📂 Category</label>
+                    <select id="productCategory" required>
+                        <option value="">Select Category</option>
+                        <option value="Electronics">📱 Electronics</option>
+                        <option value="Clothing">👕 Clothing</option>
+                        <option value="Food">🍔 Food & Beverage</option>
+                        <option value="Home">🏠 Home & Garden</option>
+                        <option value="Sports">⚽ Sports & Outdoors</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>📊 Initial Stock</label>
+                    <input type="number" id="productStock" required min="0">
+                </div>
+                <div class="form-group">
+                    <label>💰 Unit Price ($)</label>
+                    <input type="number" id="productPrice" required min="0" step="0.01">
+                </div>
+                <div class="form-group">
+                    <label>⚠️ Reorder Level</label>
+                    <input type="number" id="reorderLevel" required min="0">
+                </div>
+                <div class="btn-group">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal()">❌ Cancel</button>
+                    <button type="submit" class="btn btn-primary">✅ Add Product</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <script>
+        // GTA-themed sample inventory
+        let inventory = [
+            {id: 1, name: "Grove Street Phone", category: "Electronics", stock: 45, price: 999, reorderLevel: 10, lastUpdated: "2024-01-15"},
+            {id: 2, name: "Ballas Detector", category: "Electronics", stock: 8, price: 899, reorderLevel: 15, lastUpdated: "2024-01-14"},
+            {id: 3, name: "CJ's Sneakers", category: "Clothing", stock: 23, price: 120, reorderLevel: 20, lastUpdated: "2024-01-13"},
+            {id: 4, name: "Cluckin' Bell Coffee", category: "Food", stock: 156, price: 25, reorderLevel: 50, lastUpdated: "2024-01-16"},
+            {id: 5, name: "Radio Los Santos Headphones", category: "Electronics", stock: 5, price: 199, reorderLevel: 12, lastUpdated: "2024-01-12"},
+            {id: 6, name: "Gym Equipment", category: "Sports", stock: 78, price: 35, reorderLevel: 25, lastUpdated: "2024-01-15"},
+            {id: 7, name: "Gang Territory Watch", category: "Electronics", stock: 2, price: 299, reorderLevel: 8, lastUpdated: "2024-01-16"},
+            {id: 8, name: "Muscle Protein", category: "Sports", stock: 34, price: 45, reorderLevel: 30, lastUpdated: "2024-01-14"}
+        ];
+
+        // Initialize the application
+        function init() {
+            updateStats();
+            renderInventory();
+            updateAlerts();
+            setupTheme();
+        }
+
+        // Update statistics
+        function updateStats() {
+            const totalItems = inventory.reduce((sum, item) => sum + item.stock, 0);
+            const lowStockCount = inventory.filter(item => item.stock <= item.reorderLevel).length;
+            const totalValue = inventory.reduce((sum, item) => sum + (item.stock * item.price), 0);
+            document.getElementById('totalItems').textContent = totalItems;
+            document.getElementById('lowStock').textContent = lowStockCount;
+            document.getElementById('totalValue').textContent = `$${totalValue.toLocaleString()}`;
+            document.getElementById('pendingOrders').textContent = Math.floor(lowStockCount / 2);
+        }
+
+        // Render inventory table
+        function renderInventory(data = inventory) {
+            const tbody = document.getElementById('inventoryBody');
+            tbody.innerHTML = '';
+            data.forEach(item => {
+                const status = getStockStatus(item);
+                const row = `
+                    <tr>
+                        <td><strong>${item.name}</strong></td>
+                        <td>${item.category}</td>
+                        <td>${item.stock} units</td>
+                        <td><span class="status-badge status-${status.class}">${status.text}</span></td>
+                        <td>$${(item.stock * item.price).toLocaleString()}</td>
+                        <td>${item.lastUpdated}</td>
+                    </tr>
+                `;
+                tbody.innerHTML += row;
+            });
+        }
+
+        // Get stock status
+        function getStockStatus(item) {
+            if (item.stock <= item.reorderLevel) {
+                return {class: 'low', text: 'Low Stock'};
+            } else if (item.stock <= item.reorderLevel * 2) {
+                return {class: 'medium', text: 'Medium'};
+            } else {
+                return {class: 'high', text: 'In Stock'};
+            }
+        }
+
+        // Update alerts
+        function updateAlerts() {
+            const alertsList = document.getElementById('alertsList');
+            const lowStockItems = inventory.filter(item => item.stock <= item.reorderLevel);
+            alertsList.innerHTML = '';
+            lowStockItems.forEach(item => {
+                const alert = `
+                    <div class="alert-item">
+                        <div class="alert-icon">!</div>
+                        <div>
+                            <strong>${item.name}</strong><br>
+                            <small>Only ${item.stock} units left in Grove Street!</small>
+                        </div>
+                    </div>
+                `;
+                alertsList.innerHTML += alert;
+            });
+        }
+
+        // Search functionality
+        function searchProducts(query) {
+            const filtered = inventory.filter(item =>
+                item.name.toLowerCase().includes(query.toLowerCase()) ||
+                item.category.toLowerCase().includes(query.toLowerCase())
+            );
+            renderInventory(filtered);
+        }
+
+        // Modal functions
+        function openModal() {
+            document.getElementById('productModal').style.display = 'block';
+        }
+        function closeModal() {
+            document.getElementById('productModal').style.display = 'none';
+            document.getElementById('productForm').reset();
+        }
+        document.getElementById('productForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const newProduct = {
+                id: inventory.length + 1,
+                name: document.getElementById('productName').value,
+                category: document.getElementById('productCategory').value,
+                stock: parseInt(document.getElementById('productStock').value),
+                price: parseFloat(document.getElementById('productPrice').value),
+                reorderLevel: parseInt(document.getElementById('reorderLevel').value),
+                lastUpdated: new Date().toISOString().split('T')[0]
+            };
+            inventory.push(newProduct);
+            updateStats();
+            renderInventory();
+            updateAlerts();
+            closeModal();
+            alert('🎉 Product added to Grove Street inventory! Respect +10');
+        });
+
+        // Quick action functions
+        function generateReport() {
+            alert('📋 Generating Grove Street business report...\n\n🎯 This would include:\n• Territory stock analysis\n• Gang business recommendations\n• Profit projections\n• Respect level calculations\n\n💰 Keep grinding, CJ!');
+        }
+        function exportData() {
+            const dataStr = JSON.stringify(inventory, null, 2);
+            const dataBlob = new Blob([dataStr], {type: 'application/json'});
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'grove_street_inventory.json';
+            link.click();
+            alert('💾 Grove Street data exported successfully!');
+        }
+        function autoReorder() {
+            const reorderItems = inventory.filter(item => item.stock <= item.reorderLevel);
+            if (reorderItems.length > 0) {
+                alert(`🔄 Auto-reorder initiated for ${reorderItems.length} items:\n\n${reorderItems.map(item => `• ${item.name} (Current: ${item.stock}, Reorder: ${item.reorderLevel * 3} units)`).join('\n')}\n\n🚗 Sweet will handle the delivery!`);
+            } else {
+                alert('✅ All good in the hood! No items need reordering right now.');
+            }
+        }
+        window.onclick = function(event) {
+            const modal = document.getElementById('productModal');
+            if (event.target === modal) closeModal();
+        };
+
+        // THEME SWITCH LOGIC
+        function setupTheme() {
+            const html = document.documentElement;
+            const toggle = document.getElementById('theme-toggle');
+            // Load from localStorage or system preference
+            let theme = localStorage.getItem('theme');
+            if (!theme) {
+                theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+            }
+            html.setAttribute('data-theme', theme);
+            toggle.checked = theme === 'light';
+            toggle.addEventListener('change', function() {
+                const newTheme = toggle.checked ? 'light' : 'dark';
+                html.setAttribute('data-theme', newTheme);
+                localStorage.setItem('theme', newTheme);
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
