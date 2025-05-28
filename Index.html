@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Grove Street Inventory - San Andreas</title>
-    <!-- Google Fonts for GTA vibe -->
+    <title>GTA San Andreas Inventory</title>
+    <!-- GTA-style font -->
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -49,7 +49,7 @@
             transition: background 0.4s, color 0.4s;
         }
         .container {
-            max-width: 1400px;
+            max-width: 1200px;
             margin: 0 auto;
             padding: 24px;
         }
@@ -64,7 +64,7 @@
             text-align: center;
         }
         .header h1 {
-            font-size: 2.8rem;
+            font-size: 2.5rem;
             font-weight: 900;
             background: linear-gradient(45deg, var(--primary), var(--header), var(--primary));
             background-size: 200% 200%;
@@ -88,6 +88,7 @@
             display: flex;
             align-items: center;
             gap: 8px;
+            z-index: 2;
         }
         .theme-switch label {
             font-size: 1.1rem;
@@ -95,10 +96,10 @@
             cursor: pointer;
         }
         .switch {
-            width: 54px;
-            height: 28px;
+            width: 60px;
+            height: 30px;
             background: var(--card);
-            border-radius: 16px;
+            border-radius: 15px;
             border: 2px solid var(--border);
             position: relative;
             cursor: pointer;
@@ -109,17 +110,19 @@
         }
         .slider {
             position: absolute;
-            top: 2px;
-            left: 2px;
+            top: 3px;
+            left: 3px;
             width: 24px;
             height: 24px;
             background: var(--primary);
             border-radius: 50%;
             transition: left 0.3s, background 0.3s;
+            box-shadow: 0 0 8px var(--primary);
         }
         .switch input:checked + .slider {
-            left: 26px;
+            left: 33px;
             background: var(--primary);
+            box-shadow: 0 0 12px var(--primary);
         }
         .stats-grid {
             display: grid;
@@ -137,7 +140,7 @@
             transition: box-shadow 0.3s;
         }
         .stat-number {
-            font-size: 2.5rem;
+            font-size: 2.2rem;
             font-weight: 900;
             color: var(--primary);
         }
@@ -166,7 +169,7 @@
             margin-bottom: 25px;
         }
         .section-header h2 {
-            font-size: 1.5rem;
+            font-size: 1.3rem;
             color: var(--primary);
             font-weight: 900;
             text-transform: uppercase;
@@ -223,15 +226,39 @@
         .status-badge {
             padding: 5px 12px;
             border-radius: 20px;
-            font-size: 12px;
+            font-size: 13px;
             font-weight: 900;
             text-transform: uppercase;
             letter-spacing: 1px;
             border: 1px solid;
+            display: inline-block;
+            transition: background 0.3s, box-shadow 0.3s;
         }
-        .status-low { background: #ff4444; color: #fff; border-color: #ff4444;}
-        .status-medium { background: #ffa500; color: #000; border-color: #ffa500;}
-        .status-high { background: #32cd32; color: #000; border-color: #32cd32;}
+        .status-low {
+            background: linear-gradient(45deg, #ff4444, #ff0000);
+            color: #fff;
+            border-color: #ff0000;
+            box-shadow: 0 0 10px #ff0000;
+            font-weight: 900;
+            text-shadow: 0 0 5px #ff4444, 0 0 10px #fff;
+            animation: glowLow 1.5s infinite alternate;
+        }
+        @keyframes glowLow {
+            from { box-shadow: 0 0 10px #ff0000, 0 0 2px #fff; }
+            to { box-shadow: 0 0 20px #ff2222, 0 0 8px #fff; }
+        }
+        .status-medium {
+            background: linear-gradient(45deg, #ffa500, #ffecb3);
+            color: #222;
+            border-color: #ffa500;
+            box-shadow: 0 0 6px #ffa500;
+        }
+        .status-high {
+            background: linear-gradient(45deg, #32cd32, #b2ffb2);
+            color: #222;
+            border-color: #32cd32;
+            box-shadow: 0 0 6px #32cd32;
+        }
         .sidebar {
             display: flex;
             flex-direction: column;
@@ -343,7 +370,7 @@
     <div class="container">
         <div class="header">
             <div class="theme-switch">
-                <label for="theme-toggle">🌙/☀️</label>
+                <label for="theme-toggle" title="Toggle Dark/Light Mode">🌙/☀️</label>
                 <div class="switch">
                     <input type="checkbox" id="theme-toggle">
                     <span class="slider"></span>
@@ -608,9 +635,9 @@
                 theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
             }
             html.setAttribute('data-theme', theme);
-            toggle.checked = theme === 'light' ? false : true;
+            toggle.checked = theme === 'light';
             toggle.addEventListener('change', function() {
-                const newTheme = toggle.checked ? 'dark' : 'light';
+                const newTheme = toggle.checked ? 'light' : 'dark';
                 html.setAttribute('data-theme', newTheme);
                 localStorage.setItem('theme', newTheme);
             });
